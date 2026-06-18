@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Microsoft Entra Suite — Community Demo Kit</title>
+  <meta name="description" content="A community-built, end-to-end demo kit for five Microsoft Entra Suite capabilities. Technical runbooks, PowerShell automation, and step-by-step build guides.">
+  <style>
+    /* ── Reset & base ─────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue:       #0078D4;
+      --blue-dark:  #005A9E;
+      --blue-light: #EFF6FC;
+      --blue-mid:   #D0E7F8;
+      --green:      #107C10;
+      --green-bg:   #DFF6DD;
+      --orange:     #C55A00;
+      --orange-bg:  #FFF4CE;
+      --red:        #A4262C;
+      --text:       #323130;
+      --muted:      #605E5C;
+      --border:     #EDEBE9;
+      --bg:         #FAFAFA;
+      --white:      #FFFFFF;
+      --code-bg:    #1E1E1E;
+      --nav-w:      260px;
+      --header-h:   56px;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: var(--text);
+      background: var(--bg);
+    }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; color: var(--blue-dark); }
+
+    /* ── Top header ───────────────────────────────────────────────────── */
+    .site-header {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--blue);
+      display: flex;
+      align-items: center;
+      padding: 0 20px;
+      gap: 14px;
+      z-index: 100;
+      box-shadow: 0 2px 6px rgba(0,0,0,.25);
+    }
+    .site-header svg { flex-shrink: 0; }
+    .site-header-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .site-header-subtitle {
+      font-size: 12px;
+      color: rgba(255,255,255,.75);
+      white-space: nowrap;
+    }
+    .header-divider { width: 1px; height: 28px; background: rgba(255,255,255,.3); }
+    .header-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+    .header-badge {
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      padding: 3px 10px;
+      border-radius: 12px;
+    }
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      color: #fff;
+    }
+    @media(max-width: 768px) {
+      .hamburger { display: flex; align-items: center; }
+      .header-badge { display: none; }
+    }
+
+    /* ── Layout ───────────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      margin-top: var(--header-h);
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ── Sidebar nav ──────────────────────────────────────────────────── */
+    .sidebar {
+      width: var(--nav-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100vh - var(--header-h));
+      overflow-y: auto;
+      background: var(--white);
+      border-right: 1px solid var(--border);
+      padding: 20px 0 40px;
+      scrollbar-width: thin;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+    .nav-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      padding: 16px 20px 4px;
+    }
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 20px;
+      font-size: 13.5px;
+      color: var(--text);
+      transition: background .12s, color .12s;
+      border-left: 3px solid transparent;
+    }
+    .nav-link:hover {
+      background: var(--blue-light);
+      color: var(--blue);
+      text-decoration: none;
+      border-left-color: var(--blue-mid);
+    }
+    .nav-link.active {
+      background: var(--blue-light);
+      color: var(--blue);
+      font-weight: 600;
+      border-left-color: var(--blue);
+    }
+    .nav-icon { font-size: 16px; width: 18px; text-align: center; flex-shrink: 0; }
+    .nav-download {
+      margin: 18px 16px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 9px 16px;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+    .nav-download:hover {
+      background: var(--blue-dark);
+      color: #fff;
+      text-decoration: none;
+    }
+    @media(max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: var(--header-h);
+        left: 0;
+        bottom: 0;
+        z-index: 99;
+        transform: translateX(-100%);
+        transition: transform .25s;
+        box-shadow: 2px 0 12px rgba(0,0,0,.15);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,.4);
+        z-index: 98;
+      }
+      .sidebar-overlay.open { display: block; }
+    }
+
+    /* ── Main content ─────────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 48px 80px;
+      max-width: 960px;
+    }
+    @media(max-width: 900px) { .main { padding: 30px 24px 60px; } }
+    @media(max-width: 600px) { .main { padding: 24px 16px 60px; } }
+
+    /* ── Hero ─────────────────────────────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #0078D4 0%, #005A9E 100%);
+      border-radius: 12px;
+      padding: 40px 40px 36px;
+      color: #fff;
+      margin-bottom: 40px;
+    }
+    .hero-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      opacity: .8;
+      margin-bottom: 10px;
+    }
+    .hero h1 {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 14px;
+    }
+    .hero p {
+      font-size: 15px;
+      opacity: .9;
+      max-width: 620px;
+      margin-bottom: 24px;
+    }
+    .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+    .hero-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.3);
+      color: #fff;
+    }
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fff;
+      color: var(--blue);
+      font-size: 14px;
+      font-weight: 700;
+      padding: 10px 22px;
+      border-radius: 6px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover { background: #f0f0f0; text-decoration: none; }
+    .btn-outline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 22px;
+      border-radius: 6px;
+      border: 2px solid rgba(255,255,255,.6);
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .btn-outline:hover {
+      background: rgba(255,255,255,.12);
+      border-color: #fff;
+      text-decoration: none;
+      color: #fff;
+    }
+    @media(max-width: 600px) {
+      .hero { padding: 28px 22px 26px; }
+      .hero h1 { font-size: 22px; }
+    }
+
+    /* ── Section anchors ─────────────────────────────────────────────── */
+    .section { margin-bottom: 56px; }
+    .section-anchor { display: block; height: calc(var(--header-h) + 16px); margin-top: calc(-1 * (var(--header-h) + 16px)); visibility: hidden; }
+
+    /* ── Section headers ─────────────────────────────────────────────── */
+    .section h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text);
+      border-bottom: 2px solid var(--blue);
+      padding-bottom: 8px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section h2 .icon { font-size: 22px; }
+    .section h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin: 24px 0 10px;
+    }
+    .section p { margin-bottom: 12px; color: var(--text); }
+
+    /* ── Demo cards (overview grid) ──────────────────────────────────── */
+    .demo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+      margin-bottom: 8px;
+    }
+    .demo-card {
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      border-top: 3px solid var(--blue);
+      transition: box-shadow .15s;
+    }
+    .demo-card:hover { box-shadow: 0 4px 16px rgba(0,120,212,.1); }
+    .demo-card-num {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--blue);
+      margin-bottom: 4px;
+    }
+    .demo-card h3 { font-size: 14px; margin: 0 0 6px; }
+    .demo-card p { font-size: 13px; color: var(--muted); margin: 0; }
+
+    /* ── Step cards ──────────────────────────────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step {
+      display: flex;
+      gap: 16px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 18px;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--blue);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .step-content h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+    .step-content p  { font-size: 13.5px; color: var(--muted); margin: 0; }
+    .step-content code {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ── Code blocks ─────────────────────────────────────────────────── */
+    .code-block {
+      background: var(--code-bg);
+      border-radius: 8px;
+      margin: 14px 0;
+      overflow: hidden;
+    }
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 14px;
+      background: rgba(255,255,255,.06);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .code-lang {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: rgba(255,255,255,.5);
+      letter-spacing: .06em;
+    }
+    .copy-btn {
+      font-size: 11px;
+      color: rgba(255,255,255,.5);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 3px;
+      transition: color .12s, background .12s;
+    }
+    .copy-btn:hover { color: #fff; background: rgba(255,255,255,.1); }
+    .code-block pre {
+      padding: 16px 18px;
+      overflow-x: auto;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #D4D4D4;
+    }
+    .code-block pre .comment { color: #6A9955; }
+    .code-block pre .keyword { color: #569CD6; }
+    .code-block pre .string  { color: #CE9178; }
+    .code-block pre .var     { color: #9CDCFE; }
+    .code-block pre .num     { color: #B5CEA8; }
+
+    /* ── Callout boxes ───────────────────────────────────────────────── */
+    .callout {
+      display: flex;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 6px;
+      margin: 14px 0;
+      font-size: 13.5px;
+    }
+    .callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+    .callout-body strong { display: block; margin-bottom: 3px; font-size: 13px; }
+    .callout.info  { background: var(--blue-light); border-left: 4px solid var(--blue); }
+    .callout.tip   { background: var(--green-bg);   border-left: 4px solid var(--green); }
+    .callout.warn  { background: var(--orange-bg);  border-left: 4px solid var(--orange); }
+    .callout.important { background: #FDE7E9; border-left: 4px solid var(--red); }
+
+    /* ── Prereq / checklist table ────────────────────────────────────── */
+    .req-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+      margin: 12px 0;
+    }
+    .req-table th {
+      background: var(--blue);
+      color: #fff;
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .04em;
+    }
+    .req-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .req-table tr:nth-child(even) td { background: var(--bg); }
+    .req-table tr:hover td { background: var(--blue-light); }
+    .req-table code {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ── Script file list ────────────────────────────────────────────── */
+    .script-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 10px 0;
+    }
+    .script-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+    .script-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+    .script-name {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--blue-dark);
+    }
+    .script-desc { color: var(--muted); font-size: 12.5px; }
+
+    /* ── Placeholder table ───────────────────────────────────────────── */
+    .placeholder-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin: 12px 0;
+    }
+    .placeholder-table th {
+      background: #F3F2F1;
+      color: var(--text);
+      padding: 8px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      border-bottom: 2px solid var(--border);
+    }
+    .placeholder-table td {
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .placeholder-table code {
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      font-size: 12px;
+      background: var(--blue-light);
+      color: var(--blue-dark);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* ── Section divider ─────────────────────────────────────────────── */
+    .demo-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+    }
+    .demo-header-num {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--blue);
+      min-width: 56px;
+    }
+    .demo-header-content h3 { font-size: 16px; margin: 0 0 2px; }
+    .demo-header-content p  { font-size: 13px; color: var(--muted); margin: 0; }
+    .no-scripts-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--green-bg);
+      color: var(--green);
+      padding: 3px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .scripts-badge {
+      margin-left: auto;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--blue-light);
+      color: var(--blue);
+      padding: 3px 10px;
+      border-radius: 12px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── Download section ────────────────────────────────────────────── */
+    .download-box {
+      background: linear-gradient(135deg, #0078D4 0%, #005A9E 100%);
+      border-radius: 12px;
+      padding: 36px 40px;
+      color: #fff;
+      text-align: center;
+    }
+    .download-box h2 { font-size: 24px; margin-bottom: 10px; color: #fff; border: none; padding: 0; }
+    .download-box p  { opacity: .9; margin-bottom: 24px; }
+    .download-stats {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-num { font-size: 28px; font-weight: 700; }
+    .stat-label { font-size: 12px; opacity: .75; }
+
+    /* ── Footer ──────────────────────────────────────────────────────── */
+    .site-footer {
+      background: var(--white);
+      border-top: 1px solid var(--border);
+      padding: 24px 48px;
+      font-size: 13px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    @media(max-width: 600px) { .site-footer { padding: 20px 16px; } }
+  </style>
+</head>
+<body>
+
+<!-- ── Top Header ──────────────────────────────────────────────────────── -->
+<header class="site-header">
+  <!-- Microsoft / Entra icon -->
+  <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="13" height="13" fill="#F25022"/>
+    <rect x="15" width="13" height="13" fill="#7FBA00"/>
+    <rect y="15" width="13" height="13" fill="#00A4EF"/>
+    <rect x="15" y="15" width="13" height="13" fill="#FFB900"/>
+  </svg>
+  <div class="header-divider"></div>
+  <div>
+    <div class="site-header-title">Entra Suite — Community Demo Kit</div>
+    <div class="site-header-subtitle">5 demos · Technical runbooks · PowerShell automation</div>
+  </div>
+  <div class="header-right">
+    <span class="header-badge">Community · MIT License</span>
+    <span class="header-badge">Entra Suite</span>
+  </div>
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <rect y="3" width="20" height="2" rx="1"/>
+      <rect y="9" width="20" height="2" rx="1"/>
+      <rect y="15" width="20" height="2" rx="1"/>
+    </svg>
+  </button>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- ── Layout ──────────────────────────────────────────────────────────── -->
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <nav class="sidebar" id="sidebar">
+    <div class="nav-section-label">Getting Started</div>
+    <a class="nav-link" href="#overview"><span class="nav-icon">📋</span>Overview</a>
+    <a class="nav-link" href="#prerequisites"><span class="nav-icon">✅</span>Prerequisites</a>
+    <a class="nav-link" href="#quickstart"><span class="nav-icon">🚀</span>Quick Start</a>
+    <a class="nav-link" href="#customise"><span class="nav-icon">⚙️</span>Customise for Your Tenant</a>
+
+    <div class="nav-section-label">The Five Demos</div>
+    <a class="nav-link" href="#demo1"><span class="nav-icon">🔍</span>Demo 1 · Access Reviews</a>
+    <a class="nav-link" href="#demo2"><span class="nav-icon">🔄</span>Demo 2 · Lifecycle Workflows</a>
+    <a class="nav-link" href="#demo3"><span class="nav-icon">🪪</span>Demo 3 · Verified ID</a>
+    <a class="nav-link" href="#demo4"><span class="nav-icon">🌐</span>Demo 4 · Internet Access</a>
+    <a class="nav-link" href="#demo5"><span class="nav-icon">🔒</span>Demo 5 · Private Access</a>
+
+    <div class="nav-section-label">Resources</div>
+    <a class="nav-link" href="#download"><span class="nav-icon">📦</span>Download Kit</a>
+
+    <a class="nav-download" href="Entra-Suite-Demo-Community-Kit.zip" download>
+      ⬇ Download Full Kit
+    </a>
+  </nav>
+
+  <!-- ── Main ────────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-eyebrow">Community Demo Kit · Microsoft Entra Suite</div>
+      <h1>Build an End-to-End Entra Suite Demo — From Zero to Live in a Day</h1>
+      <p>Five fully documented demos covering Identity Governance, Lifecycle Workflows, Verified ID + Face Check, Internet Access, and Private Access. Every demo includes a step-by-step Technical Runbook and ready-to-run PowerShell automation.</p>
+      <div class="hero-badges">
+        <span class="hero-badge">Access Reviews</span>
+        <span class="hero-badge">Lifecycle Workflows</span>
+        <span class="hero-badge">Verified ID + Face Check</span>
+        <span class="hero-badge">Internet Access (GSA)</span>
+        <span class="hero-badge">Private Access (GSA)</span>
+      </div>
+      <div class="hero-actions">
+        <a href="Entra-Suite-Demo-Community-Kit.zip" download class="btn-primary">⬇ Download Kit (ZIP)</a>
+        <a href="#overview" class="btn-outline">Browse the Docs ↓</a>
+      </div>
+    </div>
+
+    <!-- ── Overview ──────────────────────────────────────────────────── -->
+    <div class="section">
+      <span class="section-anchor" id="overview"></span>
+      <h2><span class="icon">📋</span> Overview</h2>
+      <p>This community kit was built to help Microsoft cloud engineers and partners stand up a complete <strong>Entra Suite</strong> demo environment — with no guesswork. Each demo has its own Technical Runbook that walks you through every portal click, plus PowerShell scripts to automate the repetitive setup and reset tasks.</p>
+
+      <div class="demo-grid">
+        <div class="demo-card">
+          <div class="demo-card-num">Demo 1</div>
+          <h3>Access Reviews</h3>
+          <p>Periodic review of group membership with sign-in recommendations, one-click "Accept All", and auto-applied results.</p>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-num">Demo 2</div>
+          <h3>Lifecycle Workflows</h3>
+          <p>Automated joiner / leaver identity lifecycle — TAP delivery, license assignment, account disable — all policy-driven.</p>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-num">Demo 3</div>
+          <h3>Verified ID + Face Check</h3>
+          <p>Passwordless onboarding with biometric Face Check — new-hire access package and contractor visitor pass.</p>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-num">Demo 4</div>
+          <h3>Internet Access (GSA)</h3>
+          <p>Web content filtering via Global Secure Access — block categories, security profiles, and Conditional Access enforcement.</p>
+        </div>
+        <div class="demo-card">
+          <div class="demo-card-num">Demo 5</div>
+          <h3>Private Access (GSA)</h3>
+          <p>No-VPN access to internal web apps, SMB file shares, and RDP — using the Private Network Connector.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Prerequisites ─────────────────────────────────────────────── -->
+    <div class="section">
+      <span class="section-anchor" id="prerequisites"></span>
+      <h2><span class="icon">✅</span> Prerequisites</h2>
+
+      <table class="req-table">
+        <tr><th>Requirement</th><th>Notes</th></tr>
+        <tr><td><strong>Microsoft Entra Suite</strong></td><td>Includes Entra ID P2, Governance, Verified ID, and Global Secure Access. A trial tenant with Entra Suite is fine.</td></tr>
+        <tr><td><strong>Global Admin account</strong></td><td>All scripts use delegated scopes — no app registration needed. Just sign in when prompted.</td></tr>
+        <tr><td><strong>PowerShell 5.1 or 7.x</strong></td><td>Scripts work on both versions. Windows PowerShell or PowerShell 7 on Windows.</td></tr>
+        <tr><td><strong>Microsoft.Graph module</strong></td><td>Demo 2 includes <code>01-Install-GraphModule.ps1</code> — run it once per machine.</td></tr>
+        <tr><td><strong>Demo users</strong></td><td>Create <strong>Carol Newhire</strong> (joiner), <strong>Dave Leaver</strong> (leaver), and <strong>Manager Demo</strong> in your tenant before running Demo 2.</td></tr>
+        <tr><td><strong>Azure VMs (Demo 5 only)</strong></td><td>Two Azure VMs: <code>gsa-appsrv</code> (resource server) and <code>gsa-connector</code> (Private Network Connector). Both available from the Azure Marketplace.</td></tr>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Tip — Use a dedicated demo tenant</strong>
+        Demos 1–3 create groups, access packages, and lifecycle workflows that persist in your tenant. A dedicated Entra trial tenant keeps your production environment clean and lets you reset freely.</div>
+      </div>
+    </div>
+
+    <!-- ── Quick Start ────────────────────────────────────────────────── -->
+    <div class="section">
+      <span class="section-anchor" id="quickstart"></span>
+      <h2><span class="icon">🚀</span> Quick Start</h2>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">1</div>
+          <div class="step-content">
+            <h4>Download and unzip the kit</h4>
+            <p>Click <strong>Download Kit</strong> above. Unzip to a local folder — e.g. <code>C:\EntraSuiteDemo\</code></p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">2</div>
+          <div class="step-content">
+            <h4>Read the Series Overview</h4>
+            <p>Open <code>00-Overview\Entra-Suite-Demo-Series-Overview.docx</code> — it explains how all five demos connect end-to-end.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">3</div>
+          <div class="step-content">
+            <h4>Install the Graph module (once per machine)</h4>
+            <p>Navigate to <code>Demo2-LifecycleWorkflows\Scripts\</code> and run:</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-lang">PowerShell</span>
+          <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        </div>
+        <pre><span class="comment"># One-time setup — run once per machine</span>
+.\<span class="var">01-Install-GraphModule</span>.ps1</pre>
+      </div>
+
+      <div class="steps">
+        <div class="step">
+          <div class="step-num">4</div>
+          <div class="step-content">
+            <h4>Customise the placeholder values</h4>
+            <p>Every script that needs tenant-specific values has a <code>← CHANGE</code> comment. See the <a href="#customise">Customise for Your Tenant</a> section below.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">5</div>
+          <div class="step-content">
+            <h4>Open a demo's Technical Runbook and follow it</h4>
+            <p>Each demo folder has a <code>*-Technical-Runbook.docx</code> — follow it top to bottom for the portal configuration steps.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Customise ─────────────────────────────────────────────────── -->
+    <div class="section">
+      <span class="section-anchor" id="customise"></span>
+      <h2><span class="icon">⚙️</span> Customise for Your Tenant</h2>
+      <p>All scripts and documents use generic placeholders. Replace them before running:</p>
+
+      <table class="placeholder-table">
+        <tr><th>Placeholder</th><th>Replace with</th><th>Where</th></tr>
+        <tr>
+          <td><code>yourtenant.onmicrosoft.com</code></td>
+          <td>Your demo tenant domain</td>
+          <td>All scripts, README, runbooks</td>
+        </tr>
+        <tr>
+          <td><code>admin@yourtenant.onmicrosoft.com</code></td>
+          <td>Your Global Admin UPN</td>
+          <td><code>$AdminUpn</code> and <code>$AssignUserUpn</code> variables at top of each script</td>
+        </tr>
+        <tr>
+          <td><code>[Your Org Name]</code></td>
+          <td>Your organisation name</td>
+          <td>Verified ID issuer label in the portal + script output text</td>
+        </tr>
+        <tr>
+          <td><code>&lt;YOUR-SALES-ONBOARDING-PACKAGE-ID&gt;</code></td>
+          <td>GUID of your Sales Onboarding access package</td>
+          <td>Demo 3 reset/remove scripts — find in Entra admin center → Identity Governance → Access packages</td>
+        </tr>
+        <tr>
+          <td><code>&lt;YOUR-CONTRACTOR-PASS-PACKAGE-ID&gt;</code></td>
+          <td>GUID of your Contractor Pass access package</td>
+          <td>Same as above</td>
+        </tr>
+      </table>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><strong>Finding access package GUIDs</strong>
+        Entra admin center → Identity Governance → Entitlement management → Access packages → open the package → copy the ID from the URL bar.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DEMO 1 ═══════════════════════════════════ -->
+    <div class="section">
+      <span class="section-anchor" id="demo1"></span>
+      <h2><span class="icon">🔍</span> Demo 1 — Access Reviews</h2>
+
+      <div class="demo-header">
+        <div class="demo-header-num">Demo 1</div>
+        <div class="demo-header-content">
+          <h3>Access Reviews — Identity Governance</h3>
+          <p>Periodic review of group membership with AI-driven recommendations and auto-apply</p>
+        </div>
+        <span class="no-scripts-badge">No scripts needed</span>
+      </div>
+
+      <h3>What This Demo Covers</h3>
+      <p>A quarterly access review of the <strong>Demo-FinanceAdmins</strong> group. The platform generates approve/deny recommendations based on the last 30 days of sign-in activity. Reviewers accept all recommendations in one click. Auto-apply removes denied users from the group automatically.</p>
+
+      <h3>Files in This Demo</h3>
+      <div class="script-list">
+        <div class="script-item"><span class="script-icon">📄</span><div><div class="script-name">Access-Reviews-Technical-Runbook.docx</div><div class="script-desc">Step-by-step portal configuration and demo walkthrough with click paths</div></div></div>
+      </div>
+
+      <h3>Setup Steps</h3>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Create the demo group</h4><p>In Entra admin center → Groups → create <strong>Demo-FinanceAdmins</strong> (security group). Add demo users: Carol Newhire, Dave Leaver, Stale Demouser, Manager Demo.</p></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Create an access review</h4><p>Identity governance → Access reviews → New access review → review the Demo-FinanceAdmins group. Set reviewer to Manager Demo. Enable recommendations, auto-apply, and justification required.</p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Wait 24–48 hours</h4><p>The recommendation engine needs sign-in history to populate. Create the review the day before the demo.</p></div></div>
+      </div>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Important — create the review at least 24 hours before the demo</strong>
+        The sign-in recommendation engine needs time to analyse activity data. A review created minutes before the demo will show no recommendations.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DEMO 2 ═══════════════════════════════════ -->
+    <div class="section">
+      <span class="section-anchor" id="demo2"></span>
+      <h2><span class="icon">🔄</span> Demo 2 — Lifecycle Workflows</h2>
+
+      <div class="demo-header">
+        <div class="demo-header-num">Demo 2</div>
+        <div class="demo-header-content">
+          <h3>Lifecycle Workflows — Joiner / Leaver</h3>
+          <p>Automated identity lifecycle: TAP delivery on hire, account disable and license removal on leave</p>
+        </div>
+        <span class="scripts-badge">6 scripts included</span>
+      </div>
+
+      <h3>Demo Users</h3>
+      <table class="req-table">
+        <tr><th>User</th><th>Role</th><th>What the workflow does</th></tr>
+        <tr><td><strong>Carol Newhire</strong></td><td>Joiner</td><td>Fires pre-hire workflow: sends TAP to Manager, enables account, assigns license on hire date</td></tr>
+        <tr><td><strong>Dave Leaver</strong></td><td>Leaver</td><td>Fires offboarding workflow on leave date: removes group membership, strips license, disables account</td></tr>
+        <tr><td><strong>Manager Demo</strong></td><td>Manager</td><td>Receives the TAP delivery email and offboarding notification</td></tr>
+      </table>
+
+      <h3>Files in This Demo</h3>
+      <div class="script-list">
+        <div class="script-item"><span class="script-icon">📄</span><div><div class="script-name">Lifecycle-Workflows-Technical-Runbook.docx</div><div class="script-desc">Portal configuration for both joiner and leaver workflows</div></div></div>
+        <div class="script-item"><span class="script-icon">⚡</span><div><div class="script-name">RUN-DEMO-PREP.bat</div><div class="script-desc">One-click demo day prep — connects to Graph, resets state, verifies everything is ready</div></div></div>
+        <div class="script-item"><span class="script-icon">📜</span><div><div class="script-name">01-Install-GraphModule.ps1</div><div class="script-desc">One-time Graph module installer — run once per machine</div></div></div>
+        <div class="script-item"><span class="script-icon">📜</span><div><div class="script-name">03-PreDemo-Reset.ps1</div><div class="script-desc">Resets Carol and Dave's attributes, licenses, and group membership before each demo</div></div></div>
+        <div class="script-item"><span class="script-icon">📜</span><div><div class="script-name">04-Verify-DemoState.ps1</div><div class="script-desc">Read-only health check — confirms everything is in the expected state</div></div></div>
+      </div>
+
+      <h3>Demo Day — One Command</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell / BAT</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># Option 1: Double-click in File Explorer (easiest)</span>
+RUN-DEMO-PREP.bat
+
+<span class="comment"># Option 2: Manual steps</span>
+.\<span class="var">02-Connect-Graph</span>.ps1        <span class="comment"># sign in</span>
+.\<span class="var">03-PreDemo-Reset</span>.ps1        <span class="comment"># reset Carol + Dave</span>
+.\<span class="var">04-Verify-DemoState</span>.ps1     <span class="comment"># confirm all PASS</span></pre>
+      </div>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body"><strong>Custom tenant SKU?</strong>
+        The reset script defaults to <code>Microsoft_365_E5_(no_Teams)</code>. If your tenant uses a different SKU, pass it as a parameter: <code>.\03-PreDemo-Reset.ps1 -LicenseSkuPartNumber "SPE_E5"</code>. The script will list all available SKUs if it can't find yours.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DEMO 3 ═══════════════════════════════════ -->
+    <div class="section">
+      <span class="section-anchor" id="demo3"></span>
+      <h2><span class="icon">🪪</span> Demo 3 — Verified ID + Face Check</h2>
+
+      <div class="demo-header">
+        <div class="demo-header-num">Demo 3</div>
+        <div class="demo-header-content">
+          <h3>Verified ID + Face Check</h3>
+          <p>Passwordless onboarding and contractor visitor pass with biometric face verification</p>
+        </div>
+        <span class="scripts-badge">12 scripts included</span>
+      </div>
+
+      <h3>Three Scenarios</h3>
+      <table class="req-table">
+        <tr><th>Scenario</th><th>Access Package</th><th>Access Type</th><th>Setup required</th></tr>
+        <tr><td><strong>Helpdesk recovery</strong></td><td>Public Woodgrove app (aka.ms/vcempver)</td><td>Stateless</td><td>None — run it live</td></tr>
+        <tr><td><strong>New-hire onboarding</strong></td><td>Sales Onboarding — Face Check Demo</td><td>Permanent</td><td>Groups + access package</td></tr>
+        <tr><td><strong>Contractor visitor pass</strong></td><td>Contractor Pass — Face Check Demo</td><td>Expires after 1 day</td><td>Groups + access package</td></tr>
+      </table>
+
+      <h3>First-Time Setup</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># Step 1: Edit $AdminUpn at the top of the script — then run once</span>
+.\<span class="var">Setup-VerifiedID-Demo-Resources</span>.ps1
+
+<span class="comment"># Creates: "Sales Team" + "Contractors" M365 groups</span>
+<span class="comment"># Creates: SharePoint sites with sample folders + files</span>
+<span class="comment"># Result:  Group members automatically get site access</span></pre>
+      </div>
+
+      <h3>Before Every Demo Run</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># Normal reset — removes all group members, keeps everything else</span>
+.\<span class="var">Reset-VerifiedID-GroupMembers</span>.ps1
+
+<span class="comment"># Only if "you already have access" message appears</span>
+.\<span class="var">Reset-VerifiedID-AccessPackageAssignments</span>.ps1</pre>
+      </div>
+
+      <div class="callout important">
+        <span class="callout-icon">🔴</span>
+        <div class="callout-body"><strong>Replace GUID placeholders before running reset scripts</strong>
+        <code>Reset-VerifiedID-AccessPackageAssignments.ps1</code> and <code>Remove-VerifiedID-AccessPackages.ps1</code> contain <code>&lt;YOUR-...-PACKAGE-ID&gt;</code> placeholders. Replace them with your actual access package GUIDs from the Entra admin center.</div>
+      </div>
+
+      <h3>Portal Step — Verified ID Issuer (required)</h3>
+      <p>The scripts build the access packages but cannot configure the Verified ID requirement. Add it in the portal after running the rebuild script:</p>
+      <div class="steps">
+        <div class="step"><div class="step-num">1</div><div class="step-content"><h4>Open the access package policy</h4><p>Entra admin center → Identity Governance → Access packages → open the package → Policies → open the self-request policy → Edit</p></div></div>
+        <div class="step"><div class="step-num">2</div><div class="step-content"><h4>Add the Verified ID issuer</h4><p>Go to the <strong>Requestor information</strong> tab → + Add issuer → select <strong>[Your Org Name]</strong> → Credential: <code>VerifiedEmployee</code></p></div></div>
+        <div class="step"><div class="step-num">3</div><div class="step-content"><h4>Enable Face Check</h4><p>Turn <strong>Face Check ON</strong> → claim: <code>photo</code> → Save</p></div></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DEMO 4 ═══════════════════════════════════ -->
+    <div class="section">
+      <span class="section-anchor" id="demo4"></span>
+      <h2><span class="icon">🌐</span> Demo 4 — Internet Access (GSA)</h2>
+
+      <div class="demo-header">
+        <div class="demo-header-num">Demo 4</div>
+        <div class="demo-header-content">
+          <h3>Internet Access — Global Secure Access</h3>
+          <p>Web content filtering with security profiles and Conditional Access enforcement</p>
+        </div>
+        <span class="no-scripts-badge">No scripts needed</span>
+      </div>
+
+      <h3>What This Demo Covers</h3>
+      <p>Configure a web content filtering policy in Global Secure Access that blocks a specific category (e.g. gambling, social media). Show the block page on a Windows 11 VM that has the GSA client installed. Then optionally show the admin-side policy and the CA policy delivering it.</p>
+
+      <h3>Files in This Demo</h3>
+      <div class="script-list">
+        <div class="script-item"><span class="script-icon">📄</span><div><div class="script-name">Demo4-InternetAccess-GSA-Technical-Runbook.docx</div><div class="script-desc">Full portal walkthrough — filtering profile, security policy, CA policy, and test procedure</div></div></div>
+      </div>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ️</span>
+        <div class="callout-body"><strong>Test on an isolated Windows 11 VM</strong>
+        The demo browser must be on an Entra-joined VM with the GSA client installed. Use a dedicated test VM — never demonstrate on your personal machine as it routes all internet traffic through Microsoft's edge.</div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════ DEMO 5 ═══════════════════════════════════ -->
+    <div class="section">
+      <span class="section-anchor" id="demo5"></span>
+      <h2><span class="icon">🔒</span> Demo 5 — Private Access (GSA)</h2>
+
+      <div class="demo-header">
+        <div class="demo-header-num">Demo 5</div>
+        <div class="demo-header-content">
+          <h3>Private Access — No-VPN Internal Resources</h3>
+          <p>Access internal web apps, SMB file shares, and RDP through the Private Network Connector — no VPN</p>
+        </div>
+        <span class="scripts-badge">10 scripts included</span>
+      </div>
+
+      <h3>Architecture</h3>
+      <table class="req-table">
+        <tr><th>VM</th><th>Role</th><th>Private IP</th></tr>
+        <tr><td><strong>gsa-appsrv</strong></td><td>Resource server — hosts the internal web app (IIS), SMB share, and RDP</td><td><code>192.168.50.4</code></td></tr>
+        <tr><td><strong>gsa-connector</strong></td><td>Private Network Connector — bridges the resource server to Microsoft's cloud</td><td><code>10.0.0.5</code></td></tr>
+        <tr><td><strong>Client VM</strong></td><td>Entra-joined Windows 11 with GSA client — the end-user test machine</td><td>different subnet</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <span class="callout-icon">⚠️</span>
+        <div class="callout-body"><strong>Critical — resource server must NOT be in the same subnet as the client</strong>
+        If both VMs share the same /24 subnet, Private Access silently refuses to tunnel. The resource server must be in a different IP range from the client VM. The scripts default to <code>192.168.50.4</code> for this reason.</div>
+      </div>
+
+      <h3>First-Time Setup</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell / BAT</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># ── On gsa-appsrv (RDP in and run) ──────────────────────────────</span>
+Setup-Resources-ONECLICK.bat    <span class="comment"># installs IIS + SMB share + enables RDP</span>
+
+<span class="comment"># ── On your admin machine (after connector is registered) ────────</span>
+<span class="comment"># Edit $AssignUserUpn and $ResourceIP at the top of the script first</span>
+.\<span class="var">Build-Demo5-Config</span>.ps1         <span class="comment"># creates IP segments + assigns user</span></pre>
+      </div>
+
+      <h3>Soft Reset (Before Each Demo)</h3>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># Removes segments + assignment. VMs and connector stay running.</span>
+.\<span class="var">Reset-Demo5-Soft</span>.ps1
+
+<span class="comment"># Rebuild the config</span>
+.\<span class="var">Build-Demo5-Config</span>.ps1</pre>
+      </div>
+
+      <h3>Connector Troubleshooting</h3>
+      <p>See <code>Scripts\README-Commands-Reference.md</code> for full diagnostics. Quick checks:</p>
+      <div class="code-block">
+        <div class="code-header"><span class="code-lang">PowerShell (run on connector VM)</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+        <pre><span class="comment"># Are connector services running?</span>
+Get-Service WAPCSvc, WAPCUpdaterSvc | Format-Table Name, Status -Auto
+
+<span class="comment"># Can the connector reach the resource?</span>
+<span class="string">"Web 80:  "</span> + (Test-NetConnection <span class="num">192.168.50.4</span> -Port <span class="num">80</span>   -WarningAction SilentlyContinue).TcpTestSucceeded
+<span class="string">"SMB 445: "</span> + (Test-NetConnection <span class="num">192.168.50.4</span> -Port <span class="num">445</span>  -WarningAction SilentlyContinue).TcpTestSucceeded
+<span class="string">"RDP 3389:"</span> + (Test-NetConnection <span class="num">192.168.50.4</span> -Port <span class="num">3389</span> -WarningAction SilentlyContinue).TcpTestSucceeded</pre>
+      </div>
+    </div>
+
+    <!-- ── Download ───────────────────────────────────────────────────── -->
+    <div class="section">
+      <span class="section-anchor" id="download"></span>
+      <div class="download-box">
+        <h2>Download the Full Kit</h2>
+        <p>All five demo folders — Technical Runbooks, PowerShell scripts, BAT launchers, and this guide — in a single ZIP.</p>
+        <div class="download-stats">
+          <div class="stat"><div class="stat-num">5</div><div class="stat-label">Demos</div></div>
+          <div class="stat"><div class="stat-num">9</div><div class="stat-label">Runbooks</div></div>
+          <div class="stat"><div class="stat-num">28</div><div class="stat-label">Scripts &amp; Tools</div></div>
+          <div class="stat"><div class="stat-num">MIT</div><div class="stat-label">License</div></div>
+        </div>
+        <a href="Entra-Suite-Demo-Community-Kit.zip" download class="btn-primary" style="font-size:15px;padding:12px 32px;">
+          ⬇ Download Entra-Suite-Demo-Community-Kit.zip
+        </a>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── Footer ──────────────────────────────────────────────────────────── -->
+<footer class="site-footer">
+  <span>Microsoft Entra Suite — Community Demo Kit · MIT License · Community contribution, not official Microsoft documentation</span>
+  <span>Built for the Microsoft partner and IT pro community</span>
+</footer>
+
+<script>
+  /* ── Mobile sidebar toggle ──────────────────────────────────────────── */
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  /* ── Copy code button ───────────────────────────────────────────────── */
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre');
+    const text = pre.innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1800);
+    });
+  }
+
+  /* ── Active nav link on scroll ──────────────────────────────────────── */
+  const sections = ['overview','prerequisites','quickstart','customise',
+                    'demo1','demo2','demo3','demo4','demo5','download'];
+  const navLinks = {};
+  sections.forEach(id => {
+    navLinks[id] = document.querySelector(`.nav-link[href="#${id}"]`);
+  });
+
+  function onScroll() {
+    const scrollY = window.scrollY + 90;
+    let active = sections[0];
+    sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el && el.getBoundingClientRect().top + window.scrollY - 90 <= scrollY) {
+        active = id;
+      }
+    });
+    Object.values(navLinks).forEach(l => l && l.classList.remove('active'));
+    if (navLinks[active]) navLinks[active].classList.add('active');
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+</script>
+</body>
+</html>
