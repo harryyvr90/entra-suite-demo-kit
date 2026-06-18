@@ -1184,7 +1184,7 @@ Get-Service WAPCSvc, WAPCUpdaterSvc | <span class="f">Format-Table</span> Name, 
     Object.values(links).forEach(l => l && l.classList.remove('active'));
     if (links[active]) {
       links[active].classList.add('active');
-      links[active].scrollIntoView({ inline: 'nearest', behavior: 'smooth' });
+      links[active].scrollIntoView({ block: 'nearest', inline: 'nearest' });
     }
   }
 
