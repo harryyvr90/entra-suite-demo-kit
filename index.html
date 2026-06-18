@@ -254,6 +254,8 @@
     }
     .meta-item strong { color: var(--text); font-weight: 600; }
     .meta-icon { font-size: 15px; }
+    .meta-author { background: var(--blue-light); border-radius: 20px; padding: 4px 14px; border: 1px solid var(--blue-mid); }
+    .meta-author strong { color: var(--blue-dark); }
 
     /* ── Page wrapper ────────────────────────────────────────── */
     .page { max-width: calc(var(--content-w) + 80px); margin: 0 auto; padding: 0 40px; }
@@ -604,6 +606,7 @@
 
 <!-- ══ Meta strip ═════════════════════════════════════════════════ -->
 <div class="meta-strip">
+  <div class="meta-item meta-author"><span class="meta-icon">👤</span><span>By <strong>Harpreet Singh</strong> · Solutions Architect · Microsoft Cloud</span></div>
   <div class="meta-item"><span class="meta-icon">📦</span><span>41 files · 5 demos · 9 runbooks · 28 scripts</span></div>
   <div class="meta-item"><span class="meta-icon">🪪</span><span>Requires <strong>Entra Suite</strong> (or Entra trial tenant)</span></div>
   <div class="meta-item"><span class="meta-icon">📜</span><span><strong>MIT License</strong> · Community contribution</span></div>
@@ -1152,6 +1155,9 @@ Get-Service WAPCSvc, WAPCUpdaterSvc | <span class="f">Format-Table</span> Name, 
 
 <!-- ══ Footer ════════════════════════════════════════════════════ -->
 <footer class="site-footer">
+  <div style="font-size:15px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:6px;">
+    Created by Harpreet Singh &nbsp;·&nbsp; Solutions Architect &nbsp;·&nbsp; Microsoft Cloud
+  </div>
   <div>Microsoft Entra Suite — Community Demo Kit &nbsp;·&nbsp; MIT License &nbsp;·&nbsp; Community contribution, not official Microsoft documentation</div>
   <div style="margin-top:6px;">Built for the Microsoft partner and IT pro community &nbsp;·&nbsp; <a href="Entra-Suite-Demo-Community-Kit.zip" download>Download the Kit</a></div>
 </footer>
